@@ -25,6 +25,7 @@ class Critter extends Animals {
     constructor(scene, playerSpawn){
         super(scene);
 
+        this.direction = 0;
         this.critter = this.scene.physics.add.sprite(playerSpawn.x, playerSpawn.y, 'Critter', 4).setScale(0.5).setOrigin(0.5,0.625);
         this.critter.setCollideWorldBounds(true);
         this.critter.setSize(48,48);
@@ -37,6 +38,7 @@ class Critter extends Animals {
         //createPlayerAnimations.call(this);
         this.keys = this.scene.input.keyboard.addKeys(
             {
+
                 left: Phaser.Input.Keyboard.KeyCodes.LEFT,
                 right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
                 up: Phaser.Input.Keyboard.KeyCodes.UP,
@@ -47,17 +49,30 @@ class Critter extends Animals {
                 d: Phaser.Input.Keyboard.KeyCodes.D,
                 q: Phaser.Input.Keyboard.KeyCodes.Q,
                 e: Phaser.Input.Keyboard.KeyCodes.E,
+                space: Phaser.Input.Keyboard.KeyCodes.SPACE,
 
             }
         );
         this.damageMax = 3;
     }
+    
     update(){
       this.checkPlayerMovement();
+      if (this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.right) && this.direction == 1){
+        tryShoot();
+      } else if (this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.left) && this.direction == 2){
+        tryShoot();
+      } else if(this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.down) && this.direction == 0){
+        tryShoot();
+      } else if(this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.up) && this.direction == 3){
+        tryShoot();
+      }
     }
+
     checkPlayerMovement(){
       console.log(this.critter.x + ", " + this.targetX);
       if (this.keys.right.isDown && this.critter.x == this.targetX) {
+        this.direction = 1;
         this.dirX = 1;
           this.critter.body.velocity.x = 100;
           this.targetX = this.critter.x + 24;
@@ -71,6 +86,7 @@ class Critter extends Animals {
         }
 
         if (this.keys.left.isDown && this.critter.x == this.targetX) {
+          this.direction = 2;
           this.dirX = 0;
             this.critter.body.velocity.x = -100;
             this.targetX = this.critter.x - 24;
@@ -86,6 +102,7 @@ class Critter extends Animals {
 
 //UP DOWN
           if (this.keys.down.isDown && this.critter.y == this.targetY) {
+            this.direction = 0;
             this.dirY = 1;
               this.critter.body.velocity.y = 100;
               this.targetY = this.critter.y + 24;
@@ -98,6 +115,7 @@ class Critter extends Animals {
             }
 
             if (this.keys.up.isDown && this.critter.y == this.targetY) {
+              this.direction = 3;
               this.dirY = 0;
                 this.critter.body.velocity.y = -100;
                 this.targetY = this.critter.y - 24;
@@ -110,6 +128,10 @@ class Critter extends Animals {
                 this.targetY = this.critter.y;
               }
 
+    }
+    enableCollision(destructLayer) {
+      console.log("meow")
+        this.scene.physics.add.collider(this.critter, destructLayer);
     }
 
 }
