@@ -2,8 +2,8 @@
 class Animals {
     constructor(scene,){
         this.scene = scene;
-        //this.shadow = this.scene.add.sprite();
-        //this.shadow.setDepth(1);
+        this.shadow = this.scene.add.sprite();
+        this.shadow.setDepth(1);
     }
     update(){
 
@@ -55,24 +55,27 @@ class Critter extends Animals {
         );
         this.damageMax = 3;
     }
-    
+
     update(){
       this.checkPlayerMovement();
-      if (this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.right) && this.direction == 1){
-        tryShoot();
-      } else if (this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.left) && this.direction == 2){
-        tryShoot();
-      } else if(this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.down) && this.direction == 0){
-        tryShoot();
-      } else if(this.keys.space.isDown && Phaser.Input.Keyboard.JustDown(this.keys.up) && this.direction == 3){
-        tryShoot();
+      if (this.keys.right.isDown && Phaser.Input.Keyboard.JustDown(this.keys.space) && this.direction == 0){
+        tryShoot(this.scene);
+      }
+       if (this.keys.left.isDown && Phaser.Input.Keyboard.JustDown(this.keys.space) && this.direction == 2){
+        tryShoot(this.scene);
+      }
+      if(this.keys.down.isDown && Phaser.Input.Keyboard.JustDown(this.keys.space) && this.direction == 1){
+        tryShoot(this.scene);
+      }
+      if(this.keys.up.isDown && Phaser.Input.Keyboard.JustDown(this.keys.space) && this.direction == 3){
+        tryShoot(this.scene);
       }
     }
 
     checkPlayerMovement(){
-      console.log(this.critter.x + ", " + this.targetX);
+      //console.log(this.critter.x + ", " + this.targetX);
       if (this.keys.right.isDown && this.critter.x == this.targetX) {
-        this.direction = 1;
+        this.direction = 0;
         this.dirX = 1;
           this.critter.body.velocity.x = 100;
           this.targetX = this.critter.x + 24;
@@ -102,7 +105,7 @@ class Critter extends Animals {
 
 //UP DOWN
           if (this.keys.down.isDown && this.critter.y == this.targetY) {
-            this.direction = 0;
+            this.direction = 1;
             this.dirY = 1;
               this.critter.body.velocity.y = 100;
               this.targetY = this.critter.y + 24;

@@ -20,13 +20,13 @@ var config = {
   }
 };
 var game = new Phaser.Game(config);
-var player, enemy = [], maxEnemies= 5;
+var player, enemy = [], maxEnemies= 5, destructLayer;
 
 function preload() {
     this.load.spritesheet("Critter", "assets/critter/critterSpriteSheet.png", { frameWidth: 48, frameHeight: 64 });
     this.load.spritesheet("Fox","assets/critter/foxSpriteSheet.png", { frameWidth: 48, frameHeight: 64 });
     this.load.spritesheet("heartAttack","assets/critter/heartsheet.png", {frameWidth:38, frameHeight: 30});
-    //this.load.image("shadow","assets/critter/shadow.png");
+    this.load.image("shadow","assets/critter/shadow.png");
     this.load.image("house", "assets/critter/house.png");
     this.load.image("landscape", "assets/critter/tilesheet.png");
     this.load.tilemapTiledJSON("level1", "assets/critter/level1.json");
@@ -44,7 +44,7 @@ function create(){
     var collisionLayer = foreground, foreground2;
 
 
-    var destructLayer = this.map.createDynamicLayer("walls", landscape, 0, 0);
+    destructLayer = this.map.createDynamicLayer("walls", landscape, 0, 0);
     destructLayer.setCollisionByProperty({collision: true});
 
     var playerSpawn = this.map.findObject("playerSpawn", function (object) {
@@ -61,10 +61,10 @@ function create(){
     player.enableCollision(destructLayer);
 
     collisionLayer.setCollisionBetween(1, 1000);
-    this.physics.add.collider(player.critter, foreground);
     this.physics.add.collider(player.critter, foreground2);
-
-
+    this.physics.add.collider(player.critter, foreground);
+    
+    
     this.cameras.main.startFollow(player.critter, true, 0.5, 0.5);
     this.cameras.main.zoom = 2.5;
 
@@ -80,13 +80,13 @@ function create(){
     //    repeat: -1,
     //    frameRate: 6
     //});
-    if (this.game.config.physics.arcade.debug == true) {
-            var debugGraphics = this.add.graphics().setAlpha(0.55);
-            collisionLayer.renderDebug(debugGraphics, {
-                tileColor: null, // Color of non-colliding tiles
-                collidingTileColor: new Phaser.Display.Color(255, 255, 0, 200)
-            });
-        }
+    //if (this.game.config.physics.arcade.debug == true) {
+    //        var debugGraphics = this.add.graphics().setAlpha(0.55);
+    //        collisionLayer.renderDebug(debugGraphics, {
+    //            tileColor: null, // Color of non-colliding tiles
+    //            collidingTileColor: new Phaser.Display.Color(255, 255, 0, 200)
+    //        });
+    //    }
 
     createPlayerAnimations.call(this);
 
@@ -125,38 +125,36 @@ function createPlayerAnimations() {
     });
   }
 
-  function tryShoot() {
-      console.log("try shoot");
+  function tryShoot(scene) {
       var bullet = bullets.get(player.critter.x, player.critter.y);
       if (bullet) {
-          fireBullet.call(this, bullet, player.direction);
+          fireBullet(bullet, player.direction,scene);
       }
   }
 
-  function fireBullet(heartAttack, direction) {
+  function fireBullet(heartAttack, direction, scene) {
       heartAttack.body.collideWorldBounds = true;
       heartAttack.body.onWorldBounds = true;
       console.log("fire heartAttack");
       heartAttack.enableBody(false);
       heartAttack.setActive(true);
       heartAttack.setVisible(true);
-      //heartAttack.angle = 90 * direction;
-      //this.heartAttack.anims.play("shine",true);
-      this.physics.velocityFromRotation(90 * direction, 500, heartAttack.body.velocity);
+      console.log(direction)
+      scene.physics.velocityFromAngle(90 * direction ,200, heartAttack.body.velocity);
 
-      var destructLayer = this.map.getLayer("walls").tilemapLayer;
-      this.physics.add.collider(heartAttack, destructLayer, damageWall, null, this);
+      
+      scene.physics.add.collider(heartAttack, destructLayer, damageWall, null, this);
    }
 
-  function killheartAttack(heartAttack) {
-      heartAttack.disableBody(true, true);
-      heartAttack.setActive(false);
-      heartAttack.setVisible(false);
+  function killheartAttack(bullet) {
+      bullet.disableBody(true, true);
+      bullet.setActive(false);
+      bullet.setVisible(false);
   }
 
-  function damageWall(heartAttack, tile) {
-      var destructLayer = this.map.getLayer("walls").tilemapLayer;
-      killheartAttack(heartAttack);
+  function damageWall(bullet, tile) {
+      
+      killheartAttack(bullet);
       var index = tile.index + 1;
       var tileProperties = destructLayer.tileset[0].tileProperties[index-1];
 
